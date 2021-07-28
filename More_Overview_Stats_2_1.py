@@ -68,75 +68,81 @@ from aqt import mw
 from aqt.utils import showInfo
 from anki.hooks import wrap
 from anki.lang import _
-from anki.schedv2 import Scheduler
+from anki.scheduler.v2 import Scheduler as Scheduler2
+from anki.scheduler.v3 import Scheduler as Scheduler3
 
 addon_path = dirname(__file__)
+
 
 def _scheduled_counts(self):
     return list(self.mw.col.sched.counts())
 
+
 def _deck_is_finished(self):
     return not sum(_scheduled_counts(self))
 
+
 def overview_table(self):
 
-  stat_colors = {
-    "New" : "#00a",
-    "Learning" : "#a00",
-    "Review" : "#080",
-    "Percent" : "#888",
-    "Mature" : "#0051ff",
-    "Young" : "#0051ff",
-    "Learned" : "#080",
-    "Unseen" : "#a00",
-    "Suspended" : "#e7a100",
-    "Done on Date" : "#ddd",
-    "Days until done" : "#ddd",
-    "Total" : "#ddd",
-  }
-  date_format = "%d.%m.%Y"
-  correction_for_notes = 1
-  last_match_length = 0
-  current_deck_name = self.mw.col.decks.current()['name']
+    stat_colors = {
+        "New": "#00a",
+        "Learning": "#a00",
+        "Review": "#080",
+        "Percent": "#888",
+        "Mature": "#0051ff",
+        "Young": "#0051ff",
+        "Learned": "#080",
+        "Unseen": "#a00",
+        "Suspended": "#e7a100",
+        "Done on Date": "#ddd",
+        "Days until done": "#ddd",
+        "Total": "#ddd",
+    }
+    date_format = "%d.%m.%Y"
+    correction_for_notes = 1
+    last_match_length = 0
+    current_deck_name = self.mw.col.decks.current()["name"]
 
-  config = mw.addonManager.getConfig(__name__)
+    config = mw.addonManager.getConfig(__name__)
 
-  if config != None:
-    if 'Note Correction Factors' in config:
-      for fragment, factor in config['Note Correction Factors'].items():
-        if current_deck_name.startswith(fragment):
-          if len(fragment) > last_match_length:
-            correction_for_notes = int(factor)
-            last_match_length = len(fragment)
+    if config != None:
+        if "Note Correction Factors" in config:
+            for fragment, factor in config["Note Correction Factors"].items():
+                if current_deck_name.startswith(fragment):
+                    if len(fragment) > last_match_length:
+                        correction_for_notes = int(factor)
+                        last_match_length = len(fragment)
 
-      # prevent division by zero and negative results
-      if correction_for_notes <= 0:
-        correction_for_notes = 1
+            # prevent division by zero and negative results
+            if correction_for_notes <= 0:
+                correction_for_notes = 1
 
-    if 'Date Format' in config:
-      if config['Date Format'].strip().lower() == 'us':
-        date_format = "%m/%d/%Y"
-      elif config['Date Format'].strip().lower() == 'asia':
-        date_format = "%Y/%m/%d"
-      elif config['Date Format'].strip().lower() == 'eu':
-        date_format = "%d.%m.%Y"
-      else:
-        date_format = config['Date Format']
-    else:
-      date_format = "%d.%m.%Y"
+        if "Date Format" in config:
+            if config["Date Format"].strip().lower() == "us":
+                date_format = "%m/%d/%Y"
+            elif config["Date Format"].strip().lower() == "asia":
+                date_format = "%Y/%m/%d"
+            elif config["Date Format"].strip().lower() == "eu":
+                date_format = "%d.%m.%Y"
+            else:
+                date_format = config["Date Format"]
+        else:
+            date_format = "%d.%m.%Y"
 
-    if 'Stat Colors' in config:
-      for stat, color in config['Stat Colors'].items():
-        if stat in stat_colors:
-          stat_colors[stat] = color
+        if "Stat Colors" in config:
+            for stat, color in config["Stat Colors"].items():
+                if stat in stat_colors:
+                    stat_colors[stat] = color
 
-  try:
-    learn_per_day = self.mw.col.decks.confForDid(self.mw.col.decks.current()['id'])['new']['perDay']
-  except:
-    learn_per_day = 0
+    try:
+        learn_per_day = self.mw.col.decks.confForDid(self.mw.col.decks.current()["id"])[
+            "new"
+        ]["perDay"]
+    except:
+        learn_per_day = 0
 
-  total, mature, young, unseen, suspended, due = self.mw.col.db.first(
-    u'''
+    total, mature, young, unseen, suspended, due = self.mw.col.db.first(
+        u"""
       select
       -- total
       count(id),
@@ -156,120 +162,150 @@ def overview_table(self):
       sum(case when queue = 1 and due <= ?
            then 1 else 0 end)
       from cards where did in {:s}
-    '''.format(self.mw.col.sched._deckLimit()),
-    round(time.time()))
+    """.format(
+            self.mw.col.sched._deckLimit()
+        ),
+        round(time.time()),
+    )
 
-  if not total:
-    return u'<p>No cards found.</p>'
+    if not total:
+        return u"<p>No cards found.</p>"
 
-  scheduled_counts = _scheduled_counts(self)
+    scheduled_counts = _scheduled_counts(self)
 
-  cards = {}
+    cards = {}
 
-  cards['mature'] = mature // int(correction_for_notes)
-  cards['young'] = young // int(correction_for_notes)
-  cards['unseen'] = unseen // int(correction_for_notes)
-  cards['suspended'] = suspended // int(correction_for_notes)
+    cards["mature"] = mature // int(correction_for_notes)
+    cards["young"] = young // int(correction_for_notes)
+    cards["unseen"] = unseen // int(correction_for_notes)
+    cards["suspended"] = suspended // int(correction_for_notes)
 
-  cards['total'] = total // int(correction_for_notes)
-  cards['learned'] = cards['mature'] + cards['young']
-  cards['unlearned'] = cards['total'] - cards['learned']
+    cards["total"] = total // int(correction_for_notes)
+    cards["learned"] = cards["mature"] + cards["young"]
+    cards["unlearned"] = cards["total"] - cards["learned"]
 
-  cards['new'] = scheduled_counts[0]
-  cards['learning'] = scheduled_counts[1]
-  cards['review'] = scheduled_counts[2]
-  # cards['due'] = due + cards['review']
+    cards["new"] = scheduled_counts[0]
+    cards["learning"] = scheduled_counts[1]
+    cards["review"] = scheduled_counts[2]
+    # cards['due'] = due + cards['review']
 
-  cards['total_without_suspended'] = cards['total'] - cards['suspended']
+    cards["total_without_suspended"] = cards["total"] - cards["suspended"]
 
-  try:
-    daysUntilDone = math.ceil(cards['unseen'] / learn_per_day)
-  except:
-    daysUntilDone = 0
+    try:
+        daysUntilDone = math.ceil(cards["unseen"] / learn_per_day)
+    except:
+        daysUntilDone = 0
 
-  try:
-    cards['doneDate'] = (date.today()+timedelta(days=daysUntilDone)).strftime(date_format)
-  except:
-    showInfo("Unsupported date format. Defaulting to Day.Month.Year instead. Use one of the shorthands: \"us\", \"asia\" or \"eu\", or specify the date like \"\%d.\%m.\%Y\", \"\%m/\%d/\%Y\" etc.\n For more information check the table at: https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior", type="warning", title="More Overview Stats 2.1 Warning")
-    print(date_format)
-    cards['doneDate'] = (date.today()+timedelta(days=daysUntilDone)).strftime("%d.%m.%Y")
+    try:
+        cards["doneDate"] = (date.today() + timedelta(days=daysUntilDone)).strftime(
+            date_format
+        )
+    except:
+        showInfo(
+            'Unsupported date format. Defaulting to Day.Month.Year instead. Use one of the shorthands: "us", "asia" or "eu", or specify the date like "\%d.\%m.\%Y", "\%m/\%d/\%Y" etc.\n For more information check the table at: https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior',
+            type="warning",
+            title="More Overview Stats 2.1 Warning",
+        )
+        print(date_format)
+        cards["doneDate"] = (date.today() + timedelta(days=daysUntilDone)).strftime(
+            "%d.%m.%Y"
+        )
 
-  cards['daysLeft'] = daysUntilDone
+    cards["daysLeft"] = daysUntilDone
 
-  if(daysUntilDone == 1):
-    cards['daysLeft'] = '{} day'.format(daysUntilDone)
-  else:
-    cards['daysLeft'] = '{} days'.format(daysUntilDone)
+    if daysUntilDone == 1:
+        cards["daysLeft"] = "{} day".format(daysUntilDone)
+    else:
+        cards["daysLeft"] = "{} days".format(daysUntilDone)
 
-  cards_percent = {}
+    cards_percent = {}
 
-  cards_percent['mature'] = cards['mature'] * 1.0 / cards['total']
-  cards_percent['young'] = cards['young'] * 1.0 / cards['total']
-  cards_percent['unseen'] = cards['unseen'] * 1.0 / cards['total']
-  cards_percent['suspended'] = cards['suspended'] * 1.0 / cards['total']
+    cards_percent["mature"] = cards["mature"] * 1.0 / cards["total"]
+    cards_percent["young"] = cards["young"] * 1.0 / cards["total"]
+    cards_percent["unseen"] = cards["unseen"] * 1.0 / cards["total"]
+    cards_percent["suspended"] = cards["suspended"] * 1.0 / cards["total"]
 
-  cards_percent['total'] = 1.0
-  cards_percent['learned'] = cards['learned'] * 1.0 / cards['total']
-  cards_percent['unlearned'] = cards['unlearned'] * 1.0 / cards['total']
+    cards_percent["total"] = 1.0
+    cards_percent["learned"] = cards["learned"] * 1.0 / cards["total"]
+    cards_percent["unlearned"] = cards["unlearned"] * 1.0 / cards["total"]
 
-  cards_percent['new'] = cards['new'] * 1.0 / cards['total']
-  cards_percent['learning'] = cards['learning'] * 1.0 / cards['total']
-  cards_percent['review'] = cards['review'] * 1.0 / cards['total']
-  # cards_percent['due'] = cards['due'] * 1.0 / cards['total']
+    cards_percent["new"] = cards["new"] * 1.0 / cards["total"]
+    cards_percent["learning"] = cards["learning"] * 1.0 / cards["total"]
+    cards_percent["review"] = cards["review"] * 1.0 / cards["total"]
+    # cards_percent['due'] = cards['due'] * 1.0 / cards['total']
 
-  cards_percent_without_suspended = {}
+    cards_percent_without_suspended = {}
 
-  if(cards['total_without_suspended'] != 0):
-    cards_percent_without_suspended['mature'] = cards['mature'] * 1.0 / cards['total_without_suspended']
-    cards_percent_without_suspended['young'] = cards['young'] * 1.0 / cards['total_without_suspended']
-    cards_percent_without_suspended['unseen'] = cards['unseen'] * 1.0 / cards['total_without_suspended']
-    cards_percent_without_suspended['suspended'] = cards['suspended'] * 1.0 / cards['total_without_suspended']
+    if cards["total_without_suspended"] != 0:
+        cards_percent_without_suspended["mature"] = (
+            cards["mature"] * 1.0 / cards["total_without_suspended"]
+        )
+        cards_percent_without_suspended["young"] = (
+            cards["young"] * 1.0 / cards["total_without_suspended"]
+        )
+        cards_percent_without_suspended["unseen"] = (
+            cards["unseen"] * 1.0 / cards["total_without_suspended"]
+        )
+        cards_percent_without_suspended["suspended"] = (
+            cards["suspended"] * 1.0 / cards["total_without_suspended"]
+        )
 
-    cards_percent_without_suspended['total'] = 1.0
-    cards_percent_without_suspended['learned'] = cards['learned'] * 1.0 / cards['total_without_suspended']
-    cards_percent_without_suspended['unlearned'] = cards['unlearned'] * 1.0 / cards['total_without_suspended']
+        cards_percent_without_suspended["total"] = 1.0
+        cards_percent_without_suspended["learned"] = (
+            cards["learned"] * 1.0 / cards["total_without_suspended"]
+        )
+        cards_percent_without_suspended["unlearned"] = (
+            cards["unlearned"] * 1.0 / cards["total_without_suspended"]
+        )
 
-    cards_percent_without_suspended['new'] = cards['new'] * 1.0 / cards['total_without_suspended']
-    cards_percent_without_suspended['learning'] = cards['learning'] * 1.0 / cards['total_without_suspended']
-    cards_percent_without_suspended['review'] = cards['review'] * 1.0 / cards['total_without_suspended']
-  else:
-    cards_percent_without_suspended['mature'] = 0
-    cards_percent_without_suspended['young'] = 0
-    cards_percent_without_suspended['unseen'] = 0
-    cards_percent_without_suspended['suspended'] = 0
+        cards_percent_without_suspended["new"] = (
+            cards["new"] * 1.0 / cards["total_without_suspended"]
+        )
+        cards_percent_without_suspended["learning"] = (
+            cards["learning"] * 1.0 / cards["total_without_suspended"]
+        )
+        cards_percent_without_suspended["review"] = (
+            cards["review"] * 1.0 / cards["total_without_suspended"]
+        )
+    else:
+        cards_percent_without_suspended["mature"] = 0
+        cards_percent_without_suspended["young"] = 0
+        cards_percent_without_suspended["unseen"] = 0
+        cards_percent_without_suspended["suspended"] = 0
 
-    cards_percent_without_suspended['total'] = 1.0
-    cards_percent_without_suspended['learned'] = 0
-    cards_percent_without_suspended['unlearned'] = 0
+        cards_percent_without_suspended["total"] = 1.0
+        cards_percent_without_suspended["learned"] = 0
+        cards_percent_without_suspended["unlearned"] = 0
 
-    cards_percent_without_suspended['new'] = 0
-    cards_percent_without_suspended['learning'] = 0
-    cards_percent_without_suspended['review'] = 0
+        cards_percent_without_suspended["new"] = 0
+        cards_percent_without_suspended["learning"] = 0
+        cards_percent_without_suspended["review"] = 0
 
-  labels = {}
+    labels = {}
 
-  labels['mature'] = _('Mature')
-  labels['young'] = _('Young')
-  labels['unseen'] = _('Unseen')
-  labels['suspended'] = _('Suspended')
+    labels["mature"] = _("Mature")
+    labels["young"] = _("Young")
+    labels["unseen"] = _("Unseen")
+    labels["suspended"] = _("Suspended")
 
-  labels['total'] = _('Total')
-  labels['learned'] = _('Learned')
-  labels['unlearned'] = _('Unlearned')
+    labels["total"] = _("Total")
+    labels["learned"] = _("Learned")
+    labels["unlearned"] = _("Unlearned")
 
-  labels['new'] = _('New')
-  labels['learning'] = _('Learning')
-  labels['review'] = _('Review')
-  # labels['due'] = _('Due')
+    labels["new"] = _("New")
+    labels["learning"] = _("Learning")
+    labels["review"] = _("Review")
+    # labels['due'] = _('Due')
 
-  labels['doneDate'] = _('Done in')
+    labels["doneDate"] = _("Done in")
 
-  for key in labels:
-    labels[key] = u'{:s}:'.format(labels[key])
+    for key in labels:
+        labels[key] = u"{:s}:".format(labels[key])
 
-  button = self.mw.button
+    button = self.mw.button
 
-  output_table = u'''
+    output_table = (
+        u"""
     <style type="text/css">
     <!--
     hr {
@@ -304,71 +340,96 @@ def overview_table(self):
 
     td.new {
       font-weight: bold;
-      color: ''' + stat_colors["New"] + ''';
+      color: """
+        + stat_colors["New"]
+        + """;
     }
 
     td.learning {
       font-weight: bold;
-      color: ''' + stat_colors["Learning"] + ''';
+      color: """
+        + stat_colors["Learning"]
+        + """;
     }
 
     td.review {
       font-weight: bold;
-      color: ''' + stat_colors["Review"] + ''';
+      color: """
+        + stat_colors["Review"]
+        + """;
     }
 
     td.percent {
       font-weight: normal;
-      color: ''' + stat_colors["Percent"] + ''';
+      color: """
+        + stat_colors["Percent"]
+        + """;
     }
 
     td.mature {
       font-weight: normal;
-      color: ''' + stat_colors["Mature"] + ''';
+      color: """
+        + stat_colors["Mature"]
+        + """;
     }
 
     td.young {
       font-weight: normal;
-      color: ''' + stat_colors["Young"] + ''';
+      color: """
+        + stat_colors["Young"]
+        + """;
     }
 
     td.learned {
       font-weight: normal;
-      color: ''' + stat_colors["Learned"] + ''';
+      color: """
+        + stat_colors["Learned"]
+        + """;
     }
 
     td.unseen {
       font-weight: normal;
-      color: ''' + stat_colors["Unseen"] + ''';
+      color: """
+        + stat_colors["Unseen"]
+        + """;
     }
 
     td.suspended {
       font-weight: normal;
-      color: ''' + stat_colors["Suspended"] + ''';
+      color: """
+        + stat_colors["Suspended"]
+        + """;
     }
 
     td.doneDate {
       font-weight: bold;
-      color: ''' + stat_colors["Done on Date"] + ''';
+      color: """
+        + stat_colors["Done on Date"]
+        + """;
     }
 
     td.daysLeft {
       font-weight: bold;
-      color: ''' + stat_colors["Days until done"] + ''';
+      color: """
+        + stat_colors["Days until done"]
+        + """;
     }
 
     td.total {
       font-weight: bold;
-      color: ''' + stat_colors["Total"] + ''';
+      color: """
+        + stat_colors["Total"]
+        + """;
     }
     -->
     </style>
 
     <table cellspacing="2">
-  '''
+  """
+    )
 
-  if not _deck_is_finished(self):
-    output_table += u'''
+    if not _deck_is_finished(self):
+        output_table += u"""
       <tr>
         <td class="row1">{label[new]:s}</td>
         <td class="row2 new">{cards[new]:d}</td>
@@ -390,12 +451,14 @@ def overview_table(self):
       <tr>
         <td colspan="4"><hr /></td>
       </tr>
-    '''.format(label=labels,
-           cards=cards,
-           percent=cards_percent,
-           percent2=cards_percent_without_suspended)
+    """.format(
+            label=labels,
+            cards=cards,
+            percent=cards_percent,
+            percent2=cards_percent_without_suspended,
+        )
 
-  output_table += u'''
+    output_table += u"""
     <tr>
       <td class="row1">{label[mature]:s}</td>
       <td class="row2 mature">{cards[mature]:d}</td>
@@ -445,53 +508,65 @@ def overview_table(self):
       <td class="row3">on:</td>
       <td class="row4 doneDate">{cards[doneDate]:s}</td>
     </tr>
-  '''.format(label=labels,
-         cards=cards,
-         percent=cards_percent,
-         percent2=cards_percent_without_suspended)
+  """.format(
+        label=labels,
+        cards=cards,
+        percent=cards_percent,
+        percent2=cards_percent_without_suspended,
+    )
 
-  output = ''
+    output = ""
 
-  if _deck_is_finished(self):
-    if (config == None or not 'Show table for finished decks' in config) or (config.get(
-        'Show table for finished decks', True)):
-      output += output_table
-      output += u'''
+    if _deck_is_finished(self):
+        if (config == None or not "Show table for finished decks" in config) or (
+            config.get("Show table for finished decks", True)
+        ):
+            output += output_table
+            output += u"""
         </table>
         <hr style="margin: 1.5em 0; border-top: 1px dotted #888;" />
-      '''
+      """
 
-    output += u'''
+        output += u"""
       <div style="white-space: pre-wrap;">{:s}</div>
-    '''.format(self.mw.col.sched.finishedMsg())
-  else:
-    output += output_table
-    output += u'''
+    """.format(
+            self.mw.col.sched.finishedMsg()
+        )
+    else:
+        output += output_table
+        output += u"""
       <tr>
         <td colspan="4" style="text-align: center; padding-top: 0.6em;">{button:s}</td>
       </tr>
       </table>
-    '''.format(button=button('study', _('Study Now'), id='study', extra=" autofocus"))
+    """.format(
+            button=button("study", _("Study Now"), id="study", extra=" autofocus")
+        )
 
-  return output
+    return output
+
 
 def _is_finished(self):
     config = mw.addonManager.getConfig(__name__)
     if self._og_is_finished():
-        if (config == None or not 'Show table for finished decks' in config) or (config.get(
-            'Show table for finished decks', True)):
+        if (config == None or not "Show table for finished decks" in config) or (
+            config.get("Show table for finished decks", True)
+        ):
             return False
         else:
             return True
     else:
         return False
 
+
 # replace _table method
 Overview._table = overview_table
 # replace _is_finished method
 # this will likely break in a future Anki update
 try:
-  Scheduler._og_is_finished = Scheduler._is_finished
-  Scheduler._is_finished = _is_finished
+    Scheduler2._og_is_finished = Scheduler2._is_finished
+    Scheduler2._is_finished = _is_finished
+    Scheduler3._og_is_finished = Scheduler3._is_finished
+    Scheduler3._is_finished = _is_finished
 except:
-  pass
+    pass
