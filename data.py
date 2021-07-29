@@ -138,7 +138,7 @@ class DeckData:
 
     # Query Anki's db for the current deck's card states
     def _query_db(self) -> List[int]:
-        return mw.col.db.first(
+        values: List[int] = mw.col.db.first(
             f"""
                 select
                 -- total
@@ -163,6 +163,12 @@ class DeckData:
             round(time.time()),
         )
 
+        # Empty filtered decks can return None => set all values 0
+        if None in values:
+            values = [0 for x in values]
+
+        return values
+
     # Get card state counts from Anki's scheduler (new, learning, review)
     def _get_scheduled_counts(self) -> List[int]:
         return list(mw.col.sched.counts())
@@ -171,12 +177,21 @@ class DeckData:
     def _refresh_percentages(self) -> None:
         total: int = self.stats["total"]
 
-        self.percentages = {key: (value / total) for key, value in self.stats.items()}
+        # Avoid division by zero for empty decks
+        if total == 0:
+            self.percentages = {key: 0.0 for key in self.stats}
+        else:
+            self.percentages = {
+                key: (value / total) for key, value in self.stats.items()
+            }
+
+        self.percentages["total"] = 1.0
 
     # Refresh percentages of all card states ignoring suspended cards
     def _refresh_percentages_without_suspended(self) -> None:
         total_without_suspended: int = self.stats["total"] - self.stats["suspended"]
 
+        # Avoid division by zero for empty decks
         if total_without_suspended == 0:
             self.percentages_without_suspended = {key: 0.0 for key in self.stats}
         else:
