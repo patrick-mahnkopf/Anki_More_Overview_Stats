@@ -9,6 +9,7 @@
     "Young": "#0051ff",
     "Learned": "#080",
     "Unseen": "#a00",
+    "Buried": "#e7a100",
     "Suspended": "#e7a100",
     "Done on Date": "#ddd",
     "Days until done": "#ddd",
