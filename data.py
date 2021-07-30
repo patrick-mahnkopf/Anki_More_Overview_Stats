@@ -66,6 +66,17 @@ class DeckData:
 
         return not sum(self._get_scheduled_counts())
 
+    def is_empty_deck(self) -> bool:
+        """Whether the currently active deck is empty.
+
+        Returns
+        -------
+        bool
+            True if deck is empty, False otherwise.
+        """
+
+        return not self.stats["total"]
+
     # Return the table entry labels
     def _get_labels(self) -> Dict[str, str]:
         labels: Dict[str, str] = {}

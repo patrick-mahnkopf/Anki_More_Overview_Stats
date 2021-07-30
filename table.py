@@ -281,6 +281,7 @@ class Table:
         return f"""
             {self._get_study_button()}
         </table>
+        </br>
         """
 
     # Return HTML of the study button for unfinished decks

@@ -49,9 +49,7 @@ def overview_table(self) -> str:
 
     deck_data.refresh()
 
-    is_empty_deck: bool = not deck_data.stats["total"]
-
-    if is_empty_deck:
+    if deck_data.is_empty_deck():
         return "<p>No cards found.</p>"
 
     return table.get_html()
@@ -60,25 +58,30 @@ def overview_table(self) -> str:
 def prepend_table(web: AnkiWebView) -> None:
     """Prepend the overview table to Anki's congrats dialog."""
 
-    page = os.path.basename(web.page().url().path())
-    if page != "congrats.html":
+    page_uri: str = os.path.basename(web.page().url().path())
+    if page_uri != "congrats.html":
         return None
 
-    style = """
+    html_style: str = """
     <style>
         #table {margin: 0 auto; display: table}
     </style>
     """
 
+    # Need to check if id "table" already exists to avoid adding the table
+    # multiple times because Anki can call the hook more than once
     web.eval(
         """
-        div = document.createElement("div");
-        div.id = "table"
-        div.innerHTML = `{}<br>`;
-        document.body.prepend(div);
-        """.format(
-            style + overview_table(Overview)
-        )
+        if (document.getElementById("table") == null) {
+            div = document.createElement("div");
+            div.id = "table";
+            div.innerHTML = `"""
+        + html_style
+        + overview_table(Overview)
+        + """`;
+            document.body.prepend(div);
+        }
+        """
     )
 
 
