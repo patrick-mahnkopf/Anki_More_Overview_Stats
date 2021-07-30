@@ -113,13 +113,21 @@ class AddonConfig:
 
     # Load the learn per day count from the deck's settings
     def _refresh_learn_per_day(self) -> None:
+        # Try new method first (Added in Anki 2.1.45)
         try:
-            self.learn_per_day = mw.col.decks.get_config(mw.col.decks.current()["id"])[
+            current_deck_id = mw.col.decks.current()["id"]
+            self.learn_per_day = mw.col.decks.config_dict_for_deck_id(current_deck_id)[
                 "new"
             ]["perDay"]
-        except Exception as excp:
-            print(excp)
             return None
+        except Exception:
+            # Use old deprecated method if the newer one doesn't exist
+            try:
+                self.learn_per_day = mw.col.decks.confForDid(current_deck_id)["new"][
+                    "perDay"
+                ]
+            except Exception as e:
+                print(e)
 
     # Load the "Show table for finished decks" flag from the config
     def _refresh_show_table_for_finished_decks(self) -> None:

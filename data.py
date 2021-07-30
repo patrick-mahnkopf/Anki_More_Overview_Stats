@@ -124,19 +124,23 @@ class DeckData:
         self.stats["due"] = due + self.stats["review"]
 
         try:
-            daysUntilDone: int = math.ceil(
-                self.stats["unseen"] / self._config.learn_per_day
-            )
-        except Exception as excp:
-            print(excp)
+            daysUntilDone: int
+            if self._config.learn_per_day == 0:
+                daysUntilDone = 0
+            else:
+                daysUntilDone = math.ceil(
+                    self.stats["unseen"] / self._config.learn_per_day
+                )
+        except Exception as e:
+            print(e)
             daysUntilDone: int = 0
 
         try:
             self.dates["doneDate"] = (
                 date.today() + timedelta(days=daysUntilDone)
             ).strftime(self._config.date_format)
-        except Exception as excp:
-            print(excp)
+        except Exception as e:
+            print(e)
             showInfo(
                 'Unsupported date format. Defaulting to Day.Month.Year instead. Use one of the shorthands: "us", "asia" or "eu", or specify the date like "\%d.\%m.\%Y", "\%m/\%d/\%Y" etc.\n For more information check the table at: https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior',
                 type="warning",
