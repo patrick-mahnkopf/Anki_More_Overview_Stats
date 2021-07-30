@@ -56,23 +56,23 @@ class Table:
                 vertical-align: top;
             }
 
-            td.row1 {
+            td.col1 {
                 text-align: left;
             }
 
-            td.row2 {
+            td.col2 {
                 text-align: right;
                 padding-left: 1.2em;
                 padding-right: 1.2em;
             }
 
-            td.row3 {
+            td.col3 {
                 text-align: left;
                 padding-left: 1.2em;
                 padding-right: 1.2em;
             }
 
-            td.row4 {
+            td.col4 {
                 text-align: right;
             }
 
@@ -196,22 +196,22 @@ class Table:
 
         return """
         <tr>
-            <td class="row1">{labels[new]:s}</td>
-            <td class="row2 new">{deck_stats[new]:d}</td>
-            <td class="row3 percent">{deck_percentages[new]:.0%}</td>
-            <td class="row4 percent">{deck_percentages_without_suspended[new]:.0%}</td>
+            <td class="col1">{labels[new]:s}</td>
+            <td class="col2 new">{deck_stats[new]:d}</td>
+            <td class="col3 percent">{deck_percentages[new]:.0%}</td>
+            <td class="col4 percent">{deck_percentages_without_suspended[new]:.0%}</td>
         </tr>
         <tr>
-            <td class="row1">{labels[learning]:s}</td>
-            <td class="row2 learning">{deck_stats[learning]:d}</td>
-            <td class="row3 percent">{deck_percentages[learning]:.0%}</td>
-            <td class="row4 percent">{deck_percentages_without_suspended[learning]:.0%}</td>
+            <td class="col1">{labels[learning]:s}</td>
+            <td class="col2 learning">{deck_stats[learning]:d}</td>
+            <td class="col3 percent">{deck_percentages[learning]:.0%}</td>
+            <td class="col4 percent">{deck_percentages_without_suspended[learning]:.0%}</td>
         </tr>
         <tr>
-            <td class="row1">{labels[review]:s}</td>
-            <td class="row2 review">{deck_stats[review]:d}</td>
-            <td class="row3 percent">{deck_percentages[review]:.0%}</td>
-            <td class="row4 percent">{deck_percentages_without_suspended[review]:.0%}</td>
+            <td class="col1">{labels[review]:s}</td>
+            <td class="col2 review">{deck_stats[review]:d}</td>
+            <td class="col3 percent">{deck_percentages[review]:.0%}</td>
+            <td class="col4 percent">{deck_percentages_without_suspended[review]:.0%}</td>
         </tr>
         <tr>
             <td colspan="4"><hr /></td>
@@ -227,59 +227,59 @@ class Table:
     def _get_deck_stats(self) -> str:
         return """
         <tr>
-            <td class="row1">{labels[mature]:s}</td>
-            <td class="row2 mature">{deck_stats[mature]:d}</td>
-            <td class="row3 percent">{deck_percentages[mature]:.0%}</td>
-            <td class="row4 percent">{deck_percentages_without_suspended[mature]:.0%}</td>
+            <td class="col1">{labels[mature]:s}</td>
+            <td class="col2 mature">{deck_stats[mature]:d}</td>
+            <td class="col3 percent">{deck_percentages[mature]:.0%}</td>
+            <td class="col4 percent">{deck_percentages_without_suspended[mature]:.0%}</td>
         </tr>
         <tr>
-            <td class="row1">{labels[young]:s}</td>
-            <td class="row2 young">{deck_stats[young]:d}</td>
-            <td class="row3 percent">{deck_percentages[young]:.0%}</td>
-            <td class="row4 percent">{deck_percentages_without_suspended[young]:.0%}</td>
-        </tr>
-        <tr>
-            <td colspan="4"><hr /></td>
-        </tr>
-        <tr>
-            <td class="row1">{labels[learned]:s}</td>
-            <td class="row2 learned">{deck_stats[learned]:d}</td>
-            <td class="row3 percent">{deck_percentages[learned]:.0%}</td>
-            <td class="row4 percent">{deck_percentages_without_suspended[learned]:.0%}</td>
-        </tr>
-        <tr>
-            <td class="row1">{labels[unseen]:s}</td>
-            <td class="row2 unseen">{deck_stats[unseen]:d}</td>
-            <td class="row3 percent">{deck_percentages[unseen]:.0%}</td>
-            <td class="row4 percent">{deck_percentages_without_suspended[unseen]:.0%}</td>
-        </tr>
-        <tr>
-            <td class="row1">{labels[suspended]:s}</td>
-            <td class="row2 suspended">{deck_stats[suspended]:d}</td>
-            <td class="row3 percent">{deck_percentages[suspended]:.0%}</td>
-            <td class="row4 percent">ignored</td>
-        </tr>
-        <tr>
-            <td class="row1">{labels[buried]:s}</td>
-            <td class="row2 buried">{deck_stats[buried]:d}</td>
-            <td class="row3 percent">{deck_percentages[buried]:.0%}</td>
-            <td class="row4 percent">{deck_percentages_without_suspended[buried]:.0%}</td>
+            <td class="col1">{labels[young]:s}</td>
+            <td class="col2 young">{deck_stats[young]:d}</td>
+            <td class="col3 percent">{deck_percentages[young]:.0%}</td>
+            <td class="col4 percent">{deck_percentages_without_suspended[young]:.0%}</td>
         </tr>
         <tr>
             <td colspan="4"><hr /></td>
         </tr>
         <tr>
-            <td class="row1">{labels[total]:s}</td>
-            <td class="row2 total">{deck_stats[total]:d}</td>
-            <td class="row3 percent">{deck_percentages[total]:.0%}</td>
-            <td class="row4 percent">{deck_percentages_without_suspended[total]:.0%}</td>
+            <td class="col1">{labels[learned]:s}</td>
+            <td class="col2 learned">{deck_stats[learned]:d}</td>
+            <td class="col3 percent">{deck_percentages[learned]:.0%}</td>
+            <td class="col4 percent">{deck_percentages_without_suspended[learned]:.0%}</td>
+        </tr>
+        <tr>
+            <td class="col1">{labels[unseen]:s}</td>
+            <td class="col2 unseen">{deck_stats[unseen]:d}</td>
+            <td class="col3 percent">{deck_percentages[unseen]:.0%}</td>
+            <td class="col4 percent">{deck_percentages_without_suspended[unseen]:.0%}</td>
+        </tr>
+        <tr>
+            <td class="col1">{labels[buried]:s}</td>
+            <td class="col2 buried">{deck_stats[buried]:d}</td>
+            <td class="col3 percent">{deck_percentages[buried]:.0%}</td>
+            <td class="col4 percent">{deck_percentages_without_suspended[buried]:.0%}</td>
+        </tr>
+        <tr>
+            <td class="col1">{labels[suspended]:s}</td>
+            <td class="col2 suspended">{deck_stats[suspended]:d}</td>
+            <td class="col3 percent">{deck_percentages[suspended]:.0%}</td>
+            <td class="col4 percent">ignored</td>
+        </tr>
+        <tr>
+            <td colspan="4"><hr /></td>
+        </tr>
+        <tr>
+            <td class="col1">{labels[total]:s}</td>
+            <td class="col2 total">{deck_stats[total]:d}</td>
+            <td class="col3 percent">{deck_percentages[total]:.0%}</td>
+            <td class="col4 percent">{deck_percentages_without_suspended[total]:.0%}</td>
         </tr>
             <td colspan="4"><hr /></td>
         <tr>
-            <td class="row1">{labels[doneDate]:s}</td>
-            <td class="row2 daysLeft">{deck_dates[daysLeft]:s}</td>
-            <td class="row3">on:</td>
-            <td class="row4 doneDate">{deck_dates[doneDate]:s}</td>
+            <td class="col1">{labels[doneDate]:s}</td>
+            <td class="col2 daysLeft">{deck_dates[daysLeft]:s}</td>
+            <td class="col3">on:</td>
+            <td class="col4 doneDate">{deck_dates[doneDate]:s}</td>
         </tr>
         """.format(
             labels=self._deck_data.labels,
