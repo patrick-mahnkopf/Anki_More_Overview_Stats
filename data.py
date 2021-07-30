@@ -114,14 +114,16 @@ class DeckData:
             daysUntilDone: int = math.ceil(
                 self.stats["unseen"] / self._config.learn_per_day
             )
-        except Exception:
+        except Exception as excp:
+            print(excp)
             daysUntilDone: int = 0
 
         try:
             self.dates["doneDate"] = (
                 date.today() + timedelta(days=daysUntilDone)
             ).strftime(self._config.date_format)
-        except Exception:
+        except Exception as excp:
+            print(excp)
             showInfo(
                 'Unsupported date format. Defaulting to Day.Month.Year instead. Use one of the shorthands: "us", "asia" or "eu", or specify the date like "\%d.\%m.\%Y", "\%m/\%d/\%Y" etc.\n For more information check the table at: https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior',
                 type="warning",

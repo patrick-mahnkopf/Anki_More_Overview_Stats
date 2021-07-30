@@ -94,5 +94,6 @@ Overview._table = overview_table
 # Inject overview table into Anki's congrats webview
 try:
     gui_hooks.webview_did_inject_style_into_page.append(prepend_table)
-except Exception:
+except Exception as excp:
+    print(excp)
     pass

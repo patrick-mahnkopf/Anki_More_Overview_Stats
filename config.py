@@ -113,10 +113,11 @@ class AddonConfig:
     # Load the learn per day count from the deck's settings
     def _refresh_learn_per_day(self) -> None:
         try:
-            self.learn_per_day = mw.col.decks.config_dict_for_deck_id(
-                mw.col.decks.current()["id"]
-            )["new"]["perDay"]
-        except Exception:
+            self.learn_per_day = mw.col.decks.get_config(mw.col.decks.current()["id"])[
+                "new"
+            ]["perDay"]
+        except Exception as excp:
+            print(excp)
             return None
 
     # Load the "Show table for finished decks" flag from the config
