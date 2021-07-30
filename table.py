@@ -139,6 +139,13 @@ class Table:
             + """;
             }
 
+            td.buried {
+                font-weight: normal;
+                color: """
+            + self._config.stat_colors["Buried"]
+            + """;
+            }
+
             td.doneDate {
                 font-weight: bold;
                 color: """
@@ -251,6 +258,12 @@ class Table:
             <td class="row2 suspended">{deck_stats[suspended]:d}</td>
             <td class="row3 percent">{deck_percentages[suspended]:.0%}</td>
             <td class="row4 percent">ignored</td>
+        </tr>
+        <tr>
+            <td class="row1">{labels[buried]:s}</td>
+            <td class="row2 buried">{deck_stats[buried]:d}</td>
+            <td class="row3 percent">{deck_percentages[buried]:.0%}</td>
+            <td class="row4 percent">{deck_percentages_without_suspended[buried]:.0%}</td>
         </tr>
         <tr>
             <td colspan="4"><hr /></td>

@@ -10,6 +10,7 @@
     "Learned": "#080",
     "Unseen": "#a00",
     "Suspended": "#e7a100",
+    "Buried": "#e7a100",
     "Done on Date": "#ddd",
     "Days until done": "#ddd",
     "Total": "#ddd"

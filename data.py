@@ -74,6 +74,7 @@ class DeckData:
         labels["young"] = "Young"
         labels["unseen"] = "Unseen"
         labels["suspended"] = "Suspended"
+        labels['buried'] = "Buried"
 
         labels["total"] = "Total"
         labels["learned"] = "Learned"
@@ -93,13 +94,14 @@ class DeckData:
 
     # Refresh counts of all card states
     def _refresh_stats(self) -> None:
-        total, mature, young, unseen, suspended, due = self._query_db()
+        total, mature, young, unseen, suspended, buried, due = self._query_db()
         new, learning, review = self._get_scheduled_counts()
 
         self.stats["mature"] = mature // self._config.correction_for_notes
         self.stats["young"] = young // self._config.correction_for_notes
         self.stats["unseen"] = unseen // self._config.correction_for_notes
         self.stats["suspended"] = suspended // self._config.correction_for_notes
+        self.stats["buried"] = buried // self._config.correction_for_notes
 
         self.stats["total"] = total // self._config.correction_for_notes
         self.stats["learned"] = self.stats["mature"] + self.stats["young"]
@@ -155,7 +157,10 @@ class DeckData:
                 sum(case when queue = 0
                 then 1 else 0 end),
                 -- suspended
-                sum(case when queue < 0
+                sum(case when queue = -1
+                then 1 else 0 end),
+                -- buried
+                sum(case when queue in (-2, -3)
                 then 1 else 0 end),
                 -- due
                 sum(case when queue = 1 and due <= ?
