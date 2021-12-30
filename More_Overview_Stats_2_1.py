@@ -25,13 +25,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Thank you for using free software!
 """
 
-from .config import AddonConfig
-from .data import DeckData
-from .table import Table
 import os
+
 from aqt import gui_hooks
 from aqt.overview import Overview
 from aqt.webview import AnkiWebView
+
+from .config import AddonConfig
+from .data import DeckData
+from .table import Table
 
 
 def overview_table(self) -> str:
@@ -99,4 +101,3 @@ try:
     gui_hooks.webview_did_inject_style_into_page.append(prepend_table)
 except Exception as excp:
     print(excp)
-    pass

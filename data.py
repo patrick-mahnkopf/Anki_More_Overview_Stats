@@ -1,10 +1,12 @@
-from typing import List, Dict
-from .config import AddonConfig
-from datetime import date, timedelta
 import math
 import time
-from aqt.utils import showInfo
+from datetime import date, timedelta
+from typing import Dict, List
+
 from aqt import mw
+from aqt.utils import showInfo
+
+from .config import AddonConfig
 
 
 class DeckData:
@@ -124,20 +126,20 @@ class DeckData:
         self.stats["due"] = due + self.stats["review"]
 
         try:
-            daysUntilDone: int
+            days_until_done: int
             if self._config.learn_per_day == 0:
-                daysUntilDone = 0
+                days_until_done = 0
             else:
-                daysUntilDone = math.ceil(
+                days_until_done = math.ceil(
                     self.stats["unseen"] / self._config.learn_per_day
                 )
         except Exception as e:
             print(e)
-            daysUntilDone: int = 0
+            days_until_done: int = 0
 
         try:
             self.dates["doneDate"] = (
-                date.today() + timedelta(days=daysUntilDone)
+                date.today() + timedelta(days=days_until_done)
             ).strftime(self._config.date_format)
         except Exception as e:
             print(e)
@@ -147,13 +149,13 @@ class DeckData:
                 title="More Overview Stats 2.1 Warning",
             )
             self.dates["doneDate"] = (
-                date.today() + timedelta(days=daysUntilDone)
+                date.today() + timedelta(days=days_until_done)
             ).strftime("%d.%m.%Y")
 
-        if daysUntilDone == 1:
-            self.dates["daysLeft"] = "{} day".format(daysUntilDone)
+        if days_until_done == 1:
+            self.dates["daysLeft"] = "{} day".format(days_until_done)
         else:
-            self.dates["daysLeft"] = "{} days".format(daysUntilDone)
+            self.dates["daysLeft"] = "{} days".format(days_until_done)
 
     # Query Anki's db for the current deck's card states
     def _query_db(self) -> List[int]:
@@ -187,7 +189,7 @@ class DeckData:
 
         # Empty filtered decks can return None => set all values 0
         if None in values:
-            values = [0 for x in values]
+            values = [0] * len(values)
 
         return values
 

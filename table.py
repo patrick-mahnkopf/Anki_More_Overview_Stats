@@ -1,6 +1,7 @@
+from aqt import mw
+
 from .config import AddonConfig
 from .data import DeckData
-from aqt import mw
 
 
 class Table:

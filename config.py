@@ -1,4 +1,5 @@
-from typing import Dict, Any
+from typing import Any, Dict
+
 from aqt import mw
 
 
@@ -73,14 +74,16 @@ class AddonConfig:
     # Load the date format from the config
     def _refresh_date_format(self) -> None:
         if "Date Format" in self.config:
-            if self.config["Date Format"].strip().lower() == "us":
+            active_date_format: str = self.config["Date Format"].strip().lower()
+
+            if active_date_format == "us":
                 self.date_format = "%m/%d/%Y"
-            elif self.config["Date Format"].strip().lower() == "asia":
+            elif active_date_format == "asia":
                 self.date_format = "%Y/%m/%d"
-            elif self.config["Date Format"].strip().lower() == "eu":
+            elif active_date_format == "eu":
                 self.date_format = "%d.%m.%Y"
             else:
-                self.date_format = self.config["Date Format"]
+                self.date_format = active_date_format
         else:
             self.date_format = "%d.%m.%Y"
 
@@ -102,10 +105,12 @@ class AddonConfig:
         last_match_length: int = 0
 
         for fragment, factor in self.config["Note Correction Factors"].items():
-            if current_deck_name.startswith(fragment):
-                if len(fragment) > last_match_length:
-                    self.correction_for_notes = int(factor)
-                    last_match_length = len(fragment)
+            if (
+                current_deck_name.startswith(fragment)
+                and len(fragment) > last_match_length
+            ):
+                self.correction_for_notes = int(factor)
+                last_match_length = len(fragment)
 
         # Prevent division by zero and negative results
         if self.correction_for_notes <= 0:
