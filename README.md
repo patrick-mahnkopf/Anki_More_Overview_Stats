@@ -11,7 +11,7 @@ This is the More Overview Stats 2.1 Add-on for Anki.
 
 It improves Anki's default Overview screen by adding valuable information otherwise hidden behind multiple menus or not available at all.
 It also calculates a forecast for when the current deck will be finished, based on the remaining unknown cards and the deck's "New cards/day" setting.
-The date format and all colors are fully customizable through Anki's built-in config manager.
+The date format and all colors are fully customizable through the built-in config manager.
 
 ![More Overview Stats 2.1](https://user-images.githubusercontent.com/69430023/147789088-67975f64-ab4c-49ec-89e8-9301b7f13ef3.png)
 
