@@ -182,7 +182,7 @@ class DeckData:
                 -- due
                 sum(case when queue = 1 and due <= ?
                 then 1 else 0 end)
-                from cards where did in {mw.col.sched._deckLimit():s}
+                from cards where did in {mw.col.sched._deck_limit():s}
             """,
             round(time.time()),
         )
