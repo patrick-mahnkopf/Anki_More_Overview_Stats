@@ -18,7 +18,7 @@ jobs:
         run: ./build.sh
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: MoreOverviewStats
           path: MoreOverviewStats.ankiaddon
