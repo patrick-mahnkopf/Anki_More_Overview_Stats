@@ -73,19 +73,21 @@ class AddonConfig:
 
     # Load the date format from the config
     def _refresh_date_format(self) -> None:
-        if "Date Format" in self.config:
-            active_date_format: str = self.config["Date Format"].strip().lower()
+        date_format_map: Dict[str, str] = {
+            "us": "%m/%d/%Y",
+            "asia": "%Y/%m/%d",
+            "eu": "%d.%m.%Y",
+            "iso": "%Y-%m-%d"
+        }
 
-            if active_date_format == "us":
-                self.date_format = "%m/%d/%Y"
-            elif active_date_format == "asia":
-                self.date_format = "%Y/%m/%d"
-            elif active_date_format == "eu":
-                self.date_format = "%d.%m.%Y"
-            else:
-                self.date_format = active_date_format
+        if "Date Format" in self.config:
+            date_format: str = self.config["Date Format"].strip()
+            self.date_format = date_format_map.get(
+                date_format.lower(),
+                date_format
+            )
         else:
-            self.date_format = "%d.%m.%Y"
+            self.date_format = date_format_map["eu"]
 
     # Load the stat colors from the config
     def _refresh_stat_colors(self) -> None:
