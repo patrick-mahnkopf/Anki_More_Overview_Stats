@@ -3,11 +3,15 @@
 """
 More Overview Stats 2.1
 =====================
-Statistics add-on for Anki 2.1 -- based on "More Overview Stats 2" by
-Martin Zuther (http://www.mzuther.de/) which is based on
-"More Overview Stats" by Calumks <calumks@gmail.com>
+A statistics add-on for Anki 2.1.
 
-Copyright (c) 2021 Kazuwuqt <kazuwuqt@yahoo.com>
+Started in 2021 as a replacement for the then-unmaintained "More Overview
+Stats 2" by Martin Zuther (http://www.mzuther.de/), itself based on "More
+Overview Stats" by Calumks. It has since been rewritten end to end and no
+code from either remains; the note is kept as a record of where the idea
+came from.
+
+Copyright (c) 2021-2026 Patrick Nohira
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
